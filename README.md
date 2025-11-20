@@ -1,120 +1,83 @@
-# Ex. No : 4	
-# RECOGNITION OF A VALID VARIABLE WHICH STARTS WITH A LETTER FOLLOWED BY ANY NUMBER OF LETTERS OR DIGITS USING YACC
+# Ex. No : 5	
+# RECOGNITION OF THE GRAMMAR (a<sup>n</sup>b where n>=10) USING YACC
 ## Register Number : 212224220108
-## Date : 25.10.25
+## Date : 25-10-25
 
 ## AIM   
-To write a YACC program to recognize a valid variable which starts with a letter followed by any number of letters or digits.
+To write a YACC program to recognize the grammar a<sup>n</sup>b where n>=10.
 
 ## ALGORITHM
 1.	Start the program.
 2.	Write a program in the vi editor and save it with .l extension.
-3.	In the lex program, write the translation rules for the keywords int, float and double and for the identifier.
+3.	In the lex program, write the translation rules for the variables a and b.
 4.	Write a program in the vi editor and save it with .y extension.
 5.	Compile the lex program with lex compiler to produce output file as lex.yy.c. eg $ lex filename.l
-6.	Compile the yacc program with YACC compiler to produce output file as y.tab.c. eg $ yacc –d arith_id.y
+6.	Compile the yacc program with yacc compiler to produce output file as y.tab.c. eg $ yacc –d arith_id.y
 7.	Compile these with the C compiler as gcc lex.yy.c y.tab.c
-8.	Enter a statement as input and the valid variables are identified as output.
-
+8.	Enter a string as input and it is identified as valid or invalid.
+ 
 ## PROGRAM
-f3.l
+f4.l
 ```
 %{
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+/* Definition section */
 #include "y.tab.h"
 %}
 
+/* Rule Section */
 %%
-"int"                   { return INT; }
-"float"                 { return FLOAT; }
-"double"                { return DOUBLE; }
-
-[a-zA-Z_][a-zA-Z0-9_]*  {
-                            yylval.sval = strdup(yytext); 
-                            return ID;
-                        }
-
-";"                     { return SEMICOLON; }
-","                     { return COMMA; }
-[\t ]+                  ;       /* Skip spaces and tabs */
-\n                      ;       /* Ignore newlines */
-.                       { return yytext[0]; }   /* Catch-all */
+[aA]        { return A; }
+[bB]        { return B; }
+\n          { return NL; }
+.           { return yytext[0]; }
 %%
 
-int yywrap(void) {
+int yywrap(void)
+{
     return 1;
 }
-
 ```
-
-f3.y
+f4.y
 ```
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 int yylex(void);
-void yyerror(const char *s);
+void yyerror(const char *msg);
 %}
 
-/* Define union for semantic values */
-%union {
-    char *sval;
-}
-
-/* Token declarations */
-%token INT FLOAT DOUBLE
-%token <sval> ID
-%token SEMICOLON COMMA
+/* Declare tokens */
+%token A B NL
 
 %%
+/* Grammar rules */
 
-program:
-    declarations
+stmt: S NL               { printf("valid string\n"); exit(0); }
     ;
 
-declarations:
-      declaration
-    | declarations declaration
+S: A S B                 /* a matched pair of A and B, possibly nested */
+ |                       /* empty (epsilon) */
     ;
-
-declaration:
-    type id_list SEMICOLON
-    ;
-
-type:
-      INT
-    | FLOAT
-    | DOUBLE
-    ;
-
-id_list:
-      ID                  { printf("Identifier found: %s\n", $1); free($1); }
-    | id_list COMMA ID    { printf("Identifier found: %s\n", $3); free($3); }
-    ;
-
 %%
 
-int main(void) {
-    printf("Enter a variable declaration (e.g., int a, b;):\n");
+int main(void)
+{
+    printf("enter the string\n");
     yyparse();
-    printf("Parsing complete.\n");
     return 0;
 }
 
-void yyerror(const char *s) {
-    fprintf(stderr, "Parsing Error: %s\n", s);
+void yyerror(const char *msg)
+{
+    printf("invalid string\n");
+    exit(0);
 }
 
 ```
 ## OUTPUT 
-<img width="607" height="165" alt="Screenshot from 2025-10-25 14-52-23" src="https://github.com/user-attachments/assets/eac4d3dd-6d70-40e5-81bc-b8d73b20e28c" />
-
+<img width="607" height="165" alt="Screenshot from 2025-10-25 15-11-26" src="https://github.com/user-attachments/assets/98218741-debc-41ad-9c27-8fbd5e81eaa9" />
 
 ## RESULT
-A  YACC program to recognize a valid variable which starts with a letter followed by any number of letters or digits is executed successfully and the output is verified.
-
+The YACC program to recognize the grammar anb where n>=10 is executed successfully and the output is verified.
 
