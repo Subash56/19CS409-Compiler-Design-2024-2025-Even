@@ -1,86 +1,120 @@
-# Ex. No : 1	
-# IMPLEMENTATION OF SYMBOL TABLE 
+# Ex. No : 4	
+# RECOGNITION OF A VALID VARIABLE WHICH STARTS WITH A LETTER FOLLOWED BY ANY NUMBER OF LETTERS OR DIGITS USING YACC
 ## Register Number : 212224220108
-## Date : 12-09-2025
+## Date : 25.10.25
 
 ## AIM   
-To write a C program to implement a symbol table.
+To write a YACC program to recognize a valid variable which starts with a letter followed by any number of letters or digits.
 
 ## ALGORITHM
 1.	Start the program.
-2.	Get the input from the user with the terminating symbol ‘$’.
-3.	Allocate memory for the variable by dynamic memory allocation function.
-4.	If the next character of the symbol is an operator then only the memory is allocated.
-5.	While reading, the input symbol is inserted into symbol table along with its memory address.
-6.	The steps are repeated till ‘$’ is reached.
-7.	To reach a variable, enter the variable to be searched and symbol table has been checked for corresponding variable, the variable along with its address is displayed as result.
-8.	Stop the program. 
+2.	Write a program in the vi editor and save it with .l extension.
+3.	In the lex program, write the translation rules for the keywords int, float and double and for the identifier.
+4.	Write a program in the vi editor and save it with .y extension.
+5.	Compile the lex program with lex compiler to produce output file as lex.yy.c. eg $ lex filename.l
+6.	Compile the yacc program with YACC compiler to produce output file as y.tab.c. eg $ yacc –d arith_id.y
+7.	Compile these with the C compiler as gcc lex.yy.c y.tab.c
+8.	Enter a statement as input and the valid variables are identified as output.
 
 ## PROGRAM
-~~~
+f3.l
+```
+%{
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
-#include <stdlib.h> 
-#define MAX_EXPRESSION_SIZE 100
+#include <stdlib.h>
+#include "y.tab.h"
+%}
 
-int main() {
-    int i = 0, j = 0, x = 0, n, flag = 0;
-    void *add[5];
-    char b[MAX_EXPRESSION_SIZE], d[15], c, srch;
-    printf("Enter the Expression terminated by $: ");
-    while ((c = getchar()) != '$' && i < MAX_EXPRESSION_SIZE - 1) {
-        b[i++] = c;
-    }
-    b[i] = '\0'; 
-    n = i - 1;  
-    printf("Given Expression: %s\n", b);
-    printf("\nSymbol Table\n");
-    printf("Symbol\taddr\ttype\n");
-    for (j = 0; j <= n; j++) {
-        c = b[j];
-        if (isalpha((unsigned char)c)) {
-            if (j == n || b[j + 1] == '+' || b[j + 1] == '-' || b[j + 1] == '*' || b[j + 1] == '=') {
-                void *p = malloc(sizeof(char));
-                if (p == NULL) {
-                    printf("Memory allocation failed\n");
-                    return 1;
-                }
-                add[x] = p;
-                d[x] = c;
-                printf("%c\t%p\tidentifier\n", c, p);
-                x++;
-            }
-        }
-    
+%%
+"int"                   { return INT; }
+"float"                 { return FLOAT; }
+"double"                { return DOUBLE; }
+
+[a-zA-Z_][a-zA-Z0-9_]*  {
+                            yylval.sval = strdup(yytext); 
+                            return ID;
+                        }
+
+";"                     { return SEMICOLON; }
+","                     { return COMMA; }
+[\t ]+                  ;       /* Skip spaces and tabs */
+\n                      ;       /* Ignore newlines */
+.                       { return yytext[0]; }   /* Catch-all */
+%%
+
+int yywrap(void) {
+    return 1;
 }
 
-printf("\nThe symbol to be searched: ");
-getchar(); 
-srch = getchar();
+```
 
-for (i = 0; i < x; i++) { 
-    if (srch == d[i]) {
-        printf("Symbol Found\n");
-        printf("%c@address %p\n", srch, add[i]);
-        flag = 1;
-        break; 
-    }
+f3.y
+```
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int yylex(void);
+void yyerror(const char *s);
+%}
+
+/* Define union for semantic values */
+%union {
+    char *sval;
 }
 
-if (flag == 0)
-    printf("Symbol Not Found\n");
+/* Token declarations */
+%token INT FLOAT DOUBLE
+%token <sval> ID
+%token SEMICOLON COMMA
 
-for (i = 0; i < x; i++) { 
-    free(add[i]);
+%%
+
+program:
+    declarations
+    ;
+
+declarations:
+      declaration
+    | declarations declaration
+    ;
+
+declaration:
+    type id_list SEMICOLON
+    ;
+
+type:
+      INT
+    | FLOAT
+    | DOUBLE
+    ;
+
+id_list:
+      ID                  { printf("Identifier found: %s\n", $1); free($1); }
+    | id_list COMMA ID    { printf("Identifier found: %s\n", $3); free($3); }
+    ;
+
+%%
+
+int main(void) {
+    printf("Enter a variable declaration (e.g., int a, b;):\n");
+    yyparse();
+    printf("Parsing complete.\n");
+    return 0;
 }
 
-return 0;
+void yyerror(const char *s) {
+    fprintf(stderr, "Parsing Error: %s\n", s);
 }
-~~~
+
+```
 ## OUTPUT 
-<img width="1918" height="1198" alt="Screenshot 2025-09-12 152157" src="https://github.com/user-attachments/assets/609406ec-7038-4979-becc-13204a9e2293" />
+<img width="607" height="165" alt="Screenshot from 2025-10-25 14-52-23" src="https://github.com/user-attachments/assets/eac4d3dd-6d70-40e5-81bc-b8d73b20e28c" />
 
 
 ## RESULT
-The program to implement a symbol table is executed and the output is verified.
+A  YACC program to recognize a valid variable which starts with a letter followed by any number of letters or digits is executed successfully and the output is verified.
+
+
